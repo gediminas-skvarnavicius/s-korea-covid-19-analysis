@@ -5,6 +5,7 @@ from typing import Optional, Sequence, Union
 import numpy as np
 import numpy.typing as npt
 from datetime import datetime
+import pandas as pd
 
 
 def two_yaxis_plotly(
@@ -17,6 +18,7 @@ def two_yaxis_plotly(
     colors: Sequence[str],
     size: Sequence[str],
     yrange: Optional[Sequence[float]],
+    **kwargs,
 ) -> go.Figure:
     """Creates a graph with two separate lines sharing the x axis but having different y axes."""
     # Create figure with secondary y-axis
@@ -45,10 +47,7 @@ def two_yaxis_plotly(
     )
 
     fig.update_layout(
-        width=size[0],
-        height=size[1],
-        legend=dict(orientation="h", y=1.1),
-        margin=dict(t=10),
+        width=size[0], height=size[1], legend=dict(orientation="h", y=1.15), **kwargs
     )
 
     if yrange:
@@ -57,7 +56,13 @@ def two_yaxis_plotly(
     return fig
 
 
-def add_alert_background(fig: go.Figure, orange: bool = True, red: bool = True) -> None:
+def add_alert_background(
+    fig: go.Figure,
+    orange: bool = True,
+    red: bool = True,
+    blue: bool = False,
+    yellow: bool = False,
+) -> None:
     """Adds shapes to a plotly figure that correspond to infectious disease alert levels"""
     if red:
         fig.add_shape(
@@ -77,7 +82,27 @@ def add_alert_background(fig: go.Figure, orange: bool = True, red: bool = True) 
             x1="2020-02-23",  # end x-value of rectangle
             y0=fig.layout.yaxis.range[0],  # start y-value of rectangle
             y1=fig.layout.yaxis.range[1],  # end y-value of rectangle
-            fillcolor="rgba(255, 165, 0, 0.2)",  # fill color with opacity
+            fillcolor="rgba(255, 155, 0, 0.2)",  # fill color with opacity
+            line=dict(width=0),  # set the border width to 0 to remove the border
+        )
+    if blue:
+        fig.add_shape(
+            type="rect",
+            x0="2020-01-03",  # start x-value of rectangle
+            x1="2020-01-20",  # end x-value of rectangle
+            y0=fig.layout.yaxis.range[0],  # start y-value of rectangle
+            y1=fig.layout.yaxis.range[1],  # end y-value of rectangle
+            fillcolor="rgba(0, 0, 255, 0.2)",  # fill color with opacity
+            line=dict(width=0),  # set the border width to 0 to remove the border
+        )
+    if yellow:
+        fig.add_shape(
+            type="rect",
+            x0="2020-01-20",  # start x-value of rectangle
+            x1="2020-01-28",  # end x-value of rectangle
+            y0=fig.layout.yaxis.range[0],  # start y-value of rectangle
+            y1=fig.layout.yaxis.range[1],  # end y-value of rectangle
+            fillcolor="rgba(255, 255, 0, 0.2)",  # fill color with opacity
             line=dict(width=0),  # set the border width to 0 to remove the border
         )
 
@@ -131,3 +156,53 @@ def annotate_plotly_by_val(
             text=text,  # text to display
             **kwargs,
         )
+
+
+def get_correlation_pairs(
+    data: pd.DataFrame,
+    positive_cut_off: Optional[float] = None,
+    negative_cut_off: Optional[float] = None,
+    leave_center: bool = False,
+    **kwargs,
+) -> pd.DataFrame:
+    """
+    Produces a data frame that contains pairs of features
+    and their r-values based on selected cut-offs
+    """
+    if positive_cut_off is not None and not 0 <= positive_cut_off <= 1:
+        raise ValueError("Positive cut-offs must be between 0 and 1")
+    if negative_cut_off is not None and not -1 <= negative_cut_off <= 0:
+        raise ValueError("Negative cut-offs must be between -1 and 0")
+    corr_matrix = data.corr(numeric_only=True, **kwargs)
+    if not leave_center:
+        assert positive_cut_off is None or negative_cut_off is None, (
+            "one sided cut-off requires only one positive or negative cut-off value, "
+            "use leave_center=True to cut off both ends"
+        )
+        np.fill_diagonal(corr_matrix.values, None)
+        cut_correlation_matrix = corr_matrix.mask(corr_matrix <= positive_cut_off)
+        cut_correlation_matrix = cut_correlation_matrix.mask(
+            corr_matrix >= negative_cut_off
+        )
+        # filtering out values with r of less than neg, more than pos or 1
+    else:
+        cut_correlation_matrix = corr_matrix.mask(corr_matrix <= negative_cut_off)
+        # filtering out values with r lower than -0.1
+        cut_correlation_matrix = cut_correlation_matrix.mask(
+            corr_matrix >= positive_cut_off
+        )
+        # filtering out values with r higher than 0.1
+    cut_correlation_matrix = cut_correlation_matrix.stack().reset_index()
+    # stacking the remaining values
+    cut_correlation_matrix["feature_pair"] = cut_correlation_matrix[
+        ["level_0", "level_1"]
+    ].apply(frozenset, axis=1)
+    # combining levels after stacking into a single pair frozenset
+    cut_correlation_matrix = cut_correlation_matrix.drop(columns=["level_0", "level_1"])
+    # dropping previous level columns
+    cut_correlation_matrix = cut_correlation_matrix.drop_duplicates(
+        subset="feature_pair"
+    )
+    # removing duplicate pairs
+    cut_correlation_matrix = cut_correlation_matrix.rename(columns={0: "r-value"})
+    return cut_correlation_matrix
