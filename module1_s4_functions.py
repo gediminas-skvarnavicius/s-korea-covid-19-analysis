@@ -206,3 +206,14 @@ def get_correlation_pairs(
     # removing duplicate pairs
     cut_correlation_matrix = cut_correlation_matrix.rename(columns={0: "r-value"})
     return cut_correlation_matrix
+
+
+def create_bins(
+    data: Union[pd.Series, np.ndarray], number: int, log: bool = False
+) -> np.ndarray:
+    """Creates bins from min to max of specified data"""
+    if not log:
+        bins: np.ndarray = np.linspace(data.min(), data.max(), number)
+    else:
+        bins = np.logspace(np.log10(data.min()), np.log10(data.max()), number)
+    return bins
