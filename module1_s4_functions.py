@@ -217,3 +217,30 @@ def create_bins(
     else:
         bins = np.logspace(np.log10(data.min()), np.log10(data.max()), number)
     return bins
+
+
+def create_scatter_traces_sliding(dataframe, x_col, y_col, **kwargs):
+    """Creates a list of plotly graph objects to be used as traces in a trend line plot with a slider"""
+    scatter_objects = []
+    for index, row in dataframe.iterrows():
+        scatter_objects.append(
+            go.Scatter(x=dataframe[x_col][:index], y=dataframe[y_col][:index], **kwargs)
+        )
+    return scatter_objects
+
+
+def create_slider_steps(fig, last_visible: bool = False):
+    """Creates a list of sliders from a figure containing multiples traces to be scrolled over"""
+    steps = []
+    for i in range(len(fig.data) - 1):
+        visible = [False] * len(fig.data)
+        visible[i] = True
+        if last_visible == True:
+            visible[-1] = True  # last trace always visible
+        step = dict(
+            method="update",
+            args=[{"visible": visible}],
+            label=fig.data[i].customdata[i],
+        )
+        steps.append(step)
+    return steps
