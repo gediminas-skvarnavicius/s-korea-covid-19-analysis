@@ -1,33 +1,35 @@
-200331
+230331
 Data loading
-200402
+230402
 Time trend plot initiation
-200403
+230403
 Plotly trends graph
 
-200404
+230404
 timeseries of tests and new_cases
-200405
+230405
 added annotation functions
 started search trends plot
-200406
+230406
 Weather data
-200407
+230407
 begun case data exploration map added
-200411
+230411
 cases grouped map fixed
-200412
+230412
 category comparison case histogram
-200413
+230413
 patient data overview, geocoding edits
-200414
+230414
 patient data ML model implementation
-200416 
+230416 
 ML model coefficients
-200417
+230417
 Coefficient-region correlations
 
-200418
+230418
 Contact calculations and heatmap
-200419
+230419
 trend line fig functions chi2 test
+230420
+Trend line fig provinces fully added general edit

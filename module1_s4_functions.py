@@ -229,12 +229,14 @@ def create_scatter_traces_sliding(dataframe, x_col, y_col, **kwargs):
     return scatter_objects
 
 
-def create_slider_steps(fig, last_visible: bool = False):
-    """Creates a list of sliders from a figure containing multiples traces to be scrolled over"""
+def create_slider_steps(fig, num_lines: int, last_visible: bool = False):
+    """Creates a list of sliders from a figure containing multiple traces to be scrolled over"""
     steps = []
-    for i in range(len(fig.data) - 1):
+    for i in range(int(len(fig.data) / num_lines)):
         visible = [False] * len(fig.data)
-        visible[i] = True
+        data_points = int(len(fig.data) / num_lines)
+        for j in range(0, num_lines):
+            visible[i + j * data_points] = True
         if last_visible == True:
             visible[-1] = True  # last trace always visible
         step = dict(
