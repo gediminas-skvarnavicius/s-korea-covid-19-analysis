@@ -246,3 +246,14 @@ def create_slider_steps(fig, num_lines: int, last_visible: bool = False):
         )
         steps.append(step)
     return steps
+
+
+def rename_describe_table(
+    table: pd.DataFrame, index_name: str = "Metric", value_name: str = "Value"
+):
+    """Renames the pandas df.describe() output table columns"""
+    table.reset_index(inplace=True)
+    table = table.rename(
+        columns={table.columns[0]: index_name, table.columns[1]: value_name}
+    )
+    return table
