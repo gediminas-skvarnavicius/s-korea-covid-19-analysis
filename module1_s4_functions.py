@@ -249,11 +249,35 @@ def create_slider_steps(fig, num_lines: int, last_visible: bool = False):
 
 
 def rename_describe_table(
-    table: pd.DataFrame, index_name: str = "Metric", value_name: str = "Value"
+    table: Union[pd.DataFrame, pd.Series],
+    index_name: str = "Metric",
+    value_name: str = "Value",
 ):
     """Renames the pandas df.describe() output table columns"""
+    if isinstance(table, pd.Series):
+        table = table.to_frame()
     table.reset_index(inplace=True)
     table = table.rename(
         columns={table.columns[0]: index_name, table.columns[1]: value_name}
     )
     return table
+
+
+def drop_outliers_by_std(data: pd.DataFrame, columns: list[str], multiplier: float = 2):
+    """
+    Drops rows from a pd.DataFrame that have outlier values,
+    based on difference from mean by std
+    """
+    raw_data = data
+    rows_to_drop = np.array([], dtype=int)
+    for column in columns:
+        outliers = raw_data[
+            ~raw_data[column].between(
+                raw_data[column].mean() - raw_data[column].std() * multiplier,
+                raw_data[column].mean() + raw_data[column].std() * multiplier,
+            )
+        ]
+        rows_to_drop = np.append(rows_to_drop, outliers.index.values)
+    rows_to_drop = np.unique(rows_to_drop)
+    df_without_outliers = raw_data.drop(index=rows_to_drop)
+    return df_without_outliers
