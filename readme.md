@@ -16,7 +16,3 @@ Some of the more universal functions can be tested by initiating pytest:
 ```python
 python -m pytest
 ```
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
