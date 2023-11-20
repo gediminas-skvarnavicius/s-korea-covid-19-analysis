@@ -1,14 +1,14 @@
-# Module 1 Capstone - COVID-19 Dataset Analysis
+# COVID-19 Dataset Analysis
 
-Analysis of the kaggle covid-19 [dataset](https://www.kaggle.com/kimjihoo/coronavirusdataset/)
+This project is the analysis analysis of the South Korea Covid-19 [dataset](https://www.kaggle.com/kimjihoo/coronavirusdataset/)
 
 ## Usage
 
-The analysis is best viewed by downloading the project and opening the analysis.html file.
+The analysis is best viewed as the quarto rendered html [here](https://gediminas-skvarnavicius.github.io/covid_19/).
 
 The working notebook can be found as analysis.ipynb.
 
-moduke1_s4_functions.py contains some additional functions that the notebook uses.
+module1_s4_functions.py contains some additional functions that the notebook uses.
 
 ## Testing
 Some of the more universal functions can be tested by initiating pytest:
@@ -16,10 +16,6 @@ Some of the more universal functions can be tested by initiating pytest:
 ```python
 python -m pytest
 ```
-
-## Contributing
-
-Gediminas Skvarnavičius with the help of Turing College.
 
 ## License
 
